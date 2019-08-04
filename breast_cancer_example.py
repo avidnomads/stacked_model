@@ -15,9 +15,6 @@ from sklearn.ensemble import RandomForestClassifier
 from createdatasets import createDatasetBC
 from stackedmodel import Data, Stacked, featureImportances
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
 
 TRAIN_FILENAME = 'bc_train_data.csv'
 TEST_FILENAME = 'bc_test_data.csv'
@@ -77,9 +74,9 @@ print('Scoring...')
 stackedModel.scoreAllModels(train=False, test=True, verbose=False)
 print('  Done')
 
-print('\nResults:')
-print(stackedModel.scoreDataFrame())
-
 print('\nMeta model feature importances (top 20):')
 print(featureImportances(stackedModel.metaModel, stackedModel.features)[:20])
+
+print('\nResults:')
+print(stackedModel.scoreDataFrame())
 

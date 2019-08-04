@@ -14,7 +14,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import load_breast_cancer
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 
 def createDatasetBC(trainFilename, testFilename, otherFilename, testFraction):
