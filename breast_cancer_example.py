@@ -22,7 +22,7 @@ OTHER_FILENAME = 'bc_other.pkl'
 
 """ Uncomment if you need to recreate the dataset
 """
-#createDatasetBC('bc_train_data.csv', 'bc_test_data.csv', 'bc_other.pkl', 0.3)
+#createDatasetBC(TRAIN_FILENAME, TEST_FILENAME, OTHER_FILENAME, 0.3)
 """
 """
 
