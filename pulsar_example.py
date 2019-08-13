@@ -32,37 +32,48 @@ features = data.features
 data.inspectData()
 
 baseModels = {
-    'l1_regression': 
+    'l1_regression_strong': 
         LogisticRegression(
             penalty = 'l1',
-            C = 0.5,
+            C = 0.03,
             solver = 'liblinear',
-            max_iter = 100,
         ),
-    'l2_regression': 
+    'l1_regression_weak': 
+        LogisticRegression(
+            penalty = 'l1',
+            C = 0.8,
+            solver = 'liblinear',
+        ),
+    'l2_regression_strong': 
         LogisticRegression(
             penalty = 'l2',
-            C = 0.5,
+            C = 0.15,
             solver = 'liblinear',
-            max_iter = 100,
+        ),
+    'l2_regression_weak': 
+        LogisticRegression(
+            penalty = 'l2',
+            C = 2,
+            solver = 'liblinear',
         ),
 }
 
-for depth in (4, 12, 32):
+for depth in (4, 8, 12, 16, 32):
     key = 'tree_depth_' + str(depth)
     baseModels[key] = DecisionTreeClassifier(
         max_depth = depth,
-        min_samples_leaf = 5,
+        min_samples_leaf = 20,
     )
 
-for k in (1, 2, 4, 8, 16, 32):
+for k in (1, 2, 4, 8, 16, 64, 128):
     key = str(k) + '_nn'
     baseModels[key] = KNeighborsClassifier(n_neighbors = k)
 
 metaModel = RandomForestClassifier(
-    max_depth = 12,
+    max_depth = 16,
     min_samples_leaf = 5,
-    n_estimators = 200,
+    max_features = 0.75,
+    n_estimators = 250,
     random_state = 314159,
 )
 
@@ -79,4 +90,22 @@ print(featureImportances(stackedModel.metaModel, stackedModel.features)[:20])
 
 print('\nResults:')
 print(stackedModel.scoreDataFrame())
+
+
+def tryMetaModel(model):
+    """ Try a different meta model """
+    
+    stackedModel.metaModel = model
+    stackedModel.fitMetaModel()
+    stackedModel.scoreMetaModel(train=False, test=True, verbose=True)
+    
+print('\nTrying different meta models:')
+print('  1. l1 regression')
+tryMetaModel(LogisticRegression(penalty='l1', C=0.0009))
+print('  2. l2 regression')
+tryMetaModel(LogisticRegression(penalty='l2', C=0.0007))
+for i, k in enumerate((1, 2, 4, 8, 16)):
+    print('  {}. {}-neighbors'.format(2 + (i + 1), k))
+    tryMetaModel(KNeighborsClassifier(n_neighbors=k))
+
 

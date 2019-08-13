@@ -74,12 +74,32 @@ def createDatasetHTRU2(trainFilename, testFilename, otherFilename, positiveFract
         testFilename  -- .csv filename for test set
         otherFilename -- .pkl filename for dict of containing scaler
         positiveFraction -- fraction of positive class in train data
-            (e.g. if .25, then train will be 25% positive calss, 75% negative class)
+            (e.g. if .25, then train will be 25% positive class, 75% negative class)
     """
     
     logging.debug('Loading...')
     data = pd.read_csv('HTRU_2.csv', header=None)
     data.columns = ['feature_' + str(c) for c in data.columns[:-1]] + ['target']
+    
+    logging.debug('Adding features...')
+    logging.debug('  log features...')
+    originalFeatures = [c for c in data if c != 'target']
+    for f in originalFeatures:
+        epsilon = 1e-2
+        lower = data[f].min()
+        if lower < epsilon:
+            shift = abs(lower) + epsilon
+        else:
+            shift = 0
+        data['log_' + f] = np.log(data[f] + shift)
+        
+    logging.debug('  product features...')
+    originalFeatures = [c for c in data if c != 'target']
+    for f1 in originalFeatures:
+        for f2 in originalFeatures:
+            if f1 != f2:
+                col = '{}_times_{}'.format(f1, f2)
+                data[col] = data[f1] * data[f2]
     
     logging.debug('Resampling train/test sets...')
     data_0 = shuffle(data.loc[data.target == 0], random_state = 314159)

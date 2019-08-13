@@ -112,11 +112,22 @@ class Scores:
         }
         for k, v in self.confusion.items():
             self.confusion[k] = len(v)
+        
         self.scores = {
-            'Accuracy'  : (predicted == actual).sum()/len(predicted),
-            'Precision' : self.confusion['tp'] / (self.confusion['tp'] + self.confusion['fp']),
-            'Recall'    : self.confusion['tp'] / (self.confusion['tp'] + self.confusion['fn']),
+            'Accuracy'  : (predicted == actual).sum()/len(predicted)
         }
+        try:
+            self.scores['Precision'] = (
+                self.confusion['tp'] / (self.confusion['tp'] + self.confusion['fp'])
+            )
+        except ZeroDivisionError:
+            self.scores['Precision'] = np.nan
+        try:
+            self.scores['Recall'] = (
+                self.confusion['tp'] / (self.confusion['tp'] + self.confusion['fn'])
+            )
+        except ZeroDivisionError:
+            self.scores['Recall'] = np.nan
         
     
     def items(self):
@@ -243,18 +254,14 @@ class Stacked:
             return self.stored_features_
     
     
-    def fitMetaModel(self, metaModel=None):
-        if metaModel is None:
-            metaModel = self.metaModel
-        else:
-            self.metaModel = metaModel
-        metaModel.fit(self.X_train_plus_predictions, self.data.y_train)
+    def fitMetaModel(self):
+        self.metaModel.fit(self.X_train_plus_predictions, self.data.y_train)
         
         
-    def fitAllModels(self, metaModel=None):
+    def fitAllModels(self):
         self.fitBaseModels()
         self.predictBase()
-        self.fitMetaModel(metaModel)
+        self.fitMetaModel()
         
         
     def predictMeta(self, train_or_test):
